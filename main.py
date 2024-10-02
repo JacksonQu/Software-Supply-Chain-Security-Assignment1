@@ -6,6 +6,12 @@ from util import extract_public_key, verify_artifact_signature
 from merkle_proof import DefaultHasher, verify_consistency, verify_inclusion, compute_leaf_hash
 
 def get_log_entry(log_index, debug=False):
+    """
+    Retrieves an entry and inclusion proof from the transparency log (if it exists) by index.
+
+    Args:
+        log_index (int): The index of the entry.
+    """
     # verify that log index value is sane
     url = f'https://rekor.sigstore.dev/api/v1/log/entries?logIndex={log_index}'
     header = {'accept': 'application/json'}
@@ -17,6 +23,13 @@ def get_log_entry(log_index, debug=False):
     pass
 
 def get_proof(size1: int, size2: int, debug=False):
+    """
+    Get information required to generate a consistency proof for the transparency log.
+
+    Args:
+        size1 (int): The size of the tree that you wish to prove consistency from.
+        size2 (int): The size of the tree that you wish to prove consistency to.
+    """
     size1 = int(size1)
     size2 = int(size2)
     if size1 > size2:
@@ -30,12 +43,23 @@ def get_proof(size1: int, size2: int, debug=False):
         return {}
 
 def get_verification_proof(log_index, debug=False):
-    # verify that log index value is sane
+    """
+    Verify that log index value is same.
+
+    Args:
+        log_index (int): The index of the entry.
+    """
     return get_proof(1, log_index)
     pass
 
 def inclusion(log_index, artifact_filepath, debug=False):
-    # verify that log index and artifact filepath values are sane
+    """
+    Verify that log index and artifact filepath values are same.
+    
+    Args:
+        log_index (int): The index of the entry.
+        artifact_filepath (str): Path to the artifact to verify.
+    """
     log_entry = get_log_entry(log_index)
     # print(json.dumps(log_entry, indent=4))
     outer_key = next(iter(log_entry))
@@ -60,6 +84,9 @@ def inclusion(log_index, artifact_filepath, debug=False):
     pass
 
 def get_latest_checkpoint(debug=False):
+    """
+    Returns the current root hash and size of the merkle tree used to store the log entries.
+    """
     url = 'https://rekor.sigstore.dev/api/v1/log?stable=true'
     header = {'accept': 'application/json'}
     response = requests.get(url, headers=header)
@@ -70,7 +97,12 @@ def get_latest_checkpoint(debug=False):
     pass
 
 def consistency(prev_checkpoint, debug=False):
-    # verify that prev checkpoint is not empty
+    """
+    Verify that prev checkpoint is not empty.
+    
+    Args:
+        prev_checkpoint (dict): Previous checkpoint information.
+    """
     ckpt = get_latest_checkpoint()
     # tree_id = prev_checkpoint['treeID']
     tree_size = prev_checkpoint['treeSize']
