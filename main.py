@@ -7,13 +7,14 @@ from merkle_proof import DefaultHasher, verify_consistency, verify_inclusion, co
 
 def get_log_entry(log_index, debug=False):
     # verify that log index value is sane
-    url = f'https://rekor.sigstore.dev/api/v1/log/entries?logIndex={log_index}'
-    header = {'accept': 'application/json'}
-    response = requests.get(url, headers=header)
-    if response.status_code == 200:
+    try:
+        url = f'https://rekor.sigstore.dev/api/v1/log/entries?logIndex={log_index}'
+        header = {'accept': 'application/json'}
+        response = requests.get(url, headers=header)
+        response.raise_for_status()
         return response.json()
-    else:
-        return {}
+    except requests.exceptions.RequestException as exception:
+        raise exception
     pass
 
 def get_proof(size1: int, size2: int, debug=False):
@@ -21,13 +22,14 @@ def get_proof(size1: int, size2: int, debug=False):
     size2 = int(size2)
     if size1 > size2:
         raise ValueError(f'Size1({size1}) must smaller than size2({size2})')
-    url = f'https://rekor.sigstore.dev/api/v1/log/proof?firstSize={size1}&lastSize={size2}'
-    header = {'accept': 'application/json'}
-    response = requests.get(url, headers=header)
-    if response.status_code == 200:
+    try:
+        url = f'https://rekor.sigstore.dev/api/v1/log/proof?firstSize={size1}&lastSize={size2}'
+        header = {'accept': 'application/json'}
+        response = requests.get(url, headers=header)
+        response.raise_for_status()
         return response.json()
-    else:
-        return {}
+    except requests.exceptions.RequestException as exception:
+        raise exception
 
 def get_verification_proof(log_index, debug=False):
     # verify that log index value is sane
@@ -60,13 +62,14 @@ def inclusion(log_index, artifact_filepath, debug=False):
     pass
 
 def get_latest_checkpoint(debug=False):
-    url = 'https://rekor.sigstore.dev/api/v1/log?stable=true'
-    header = {'accept': 'application/json'}
-    response = requests.get(url, headers=header)
-    if response.status_code == 200:
+    try:
+        url = 'https://rekor.sigstore.dev/api/v1/log?stable=true'
+        header = {'accept': 'application/json'}
+        response = requests.get(url, headers=header)
+        response.raise_for_status()
         return response.json()
-    else:
-        return {}
+    except requests.exceptions.RequestException as exception:
+        raise exception
     pass
 
 def consistency(prev_checkpoint, debug=False):
