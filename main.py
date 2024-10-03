@@ -1,6 +1,7 @@
 import argparse
 import base64
 import json
+import os
 import requests
 from util import extract_public_key, verify_artifact_signature
 from merkle_proof import DefaultHasher, verify_consistency, verify_inclusion, compute_leaf_hash
@@ -36,6 +37,9 @@ def get_verification_proof(log_index, debug=False):
 
 def inclusion(log_index, artifact_filepath, debug=False):
     # verify that log index and artifact filepath values are sane
+    # Artifact filepath validation
+    if not os.path.exists(artifact_filepath) or not os.path.isfile(artifact_filepath):
+        raise Exception('Artifact filepath invalid.')
     log_entry = get_log_entry(log_index)
     # print(json.dumps(log_entry, indent=4))
     outer_key = next(iter(log_entry))
