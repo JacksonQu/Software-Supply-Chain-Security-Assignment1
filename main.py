@@ -60,25 +60,32 @@ def inclusion(log_index, artifact_filepath, debug=False):
         log_index (int): The index of the entry.
         artifact_filepath (str): Path to the artifact to verify.
     """
+    # Get log entry by log_index
     log_entry = get_log_entry(log_index)
     # print(json.dumps(log_entry, indent=4))
+    # Decode and get log_entry body from the response
     outer_key = next(iter(log_entry))
     decoded_body = base64.b64decode(log_entry[outer_key]['body'])
     log_entry_body = json.loads(decoded_body)
     # print(json.dumps(log_entry_body, indent=4))
+    # Extract and decode signature, certificate from log_entry body
     signature = log_entry_body['spec']['signature']['content']
     decoded_sig = base64.b64decode(signature)
     certificate = log_entry_body['spec']['signature']['publicKey']['content']
     decoded_cert = base64.b64decode(certificate)
+    # Extract public key from certificate
     public_key = extract_public_key(decoded_cert)
+    # Verify artifact by signature and public key
     verify_artifact_signature(decoded_sig, public_key, artifact_filepath)
     # verification_proof = get_verification_proof(log_entry[outer_key]['verification']['inclusionProof']['logIndex'])
     # print(json.dumps(verification_proof, indent=4))
+    # Get index, tree_size, leaf_hash, hashes, root_hash from verification proof
     index = log_entry[outer_key]['verification']['inclusionProof']['logIndex']
     tree_size = log_entry[outer_key]['verification']['inclusionProof']['treeSize']
     leaf_hash = compute_leaf_hash(log_entry[outer_key]['body'])
     hashes = log_entry[outer_key]['verification']['inclusionProof']['hashes']
     root_hash = log_entry[outer_key]['verification']['inclusionProof']['rootHash']
+    # Verify inclusion
     verify_inclusion(DefaultHasher, index, tree_size, leaf_hash, hashes, root_hash)
     print('Offline root hash calculation for inclusion verified.')
     pass
