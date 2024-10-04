@@ -20,7 +20,6 @@ def get_log_entry(log_index, debug=False):
         return response.json()
     else:
         return {}
-    pass
 
 def get_proof(size1: int, size2: int, debug=False):
     """
@@ -50,7 +49,6 @@ def get_verification_proof(log_index, debug=False):
         log_index (int): The index of the entry.
     """
     return get_proof(1, log_index)
-    pass
 
 def inclusion(log_index, artifact_filepath, debug=False):
     """
@@ -88,7 +86,6 @@ def inclusion(log_index, artifact_filepath, debug=False):
     # Verify inclusion
     verify_inclusion(DefaultHasher, index, tree_size, leaf_hash, hashes, root_hash)
     print('Offline root hash calculation for inclusion verified.')
-    pass
 
 def get_latest_checkpoint(debug=False):
     """
@@ -101,7 +98,6 @@ def get_latest_checkpoint(debug=False):
         return response.json()
     else:
         return {}
-    pass
 
 def consistency(prev_checkpoint, debug=False):
     """
@@ -117,7 +113,6 @@ def consistency(prev_checkpoint, debug=False):
     proof = get_proof(tree_size, ckpt['treeSize'])
     verify_consistency(DefaultHasher, tree_size, ckpt['treeSize'], proof['hashes'], root_hash, ckpt['rootHash'])
     print('Consistency verification successful.')
-    pass
 
 def main():
     debug = False
