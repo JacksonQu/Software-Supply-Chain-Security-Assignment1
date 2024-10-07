@@ -1,3 +1,6 @@
+"""
+main.py
+"""
 import argparse
 import base64
 import json
@@ -12,7 +15,7 @@ from merkle_proof import (
 )
 
 
-def get_log_entry(log_index, debug=False):
+def get_log_entry(log_index):
     """
     Retrieves an entry and inclusion proof from the transparency log (if it exists) by index.
 
@@ -29,7 +32,7 @@ def get_log_entry(log_index, debug=False):
         raise exception
 
 
-def get_proof(size1: int, size2: int, debug=False):
+def get_proof(size1: int, size2: int):
     """
     Get information required to generate a consistency proof for the transparency log.
 
@@ -51,7 +54,7 @@ def get_proof(size1: int, size2: int, debug=False):
         raise exception
 
 
-def get_verification_proof(log_index, debug=False):
+def get_verification_proof(log_index):
     """
     Verify that log index value is same.
 
@@ -61,7 +64,7 @@ def get_verification_proof(log_index, debug=False):
     return get_proof(1, log_index)
 
 
-def inclusion(log_index, artifact_filepath, debug=False):
+def inclusion(log_index, artifact_filepath):
     """
     Verify that log index and artifact filepath values are same.
 
@@ -81,15 +84,21 @@ def inclusion(log_index, artifact_filepath, debug=False):
     log_entry_body = json.loads(decoded_body)
     # print(json.dumps(log_entry_body, indent=4))
     # Extract and decode signature, certificate from log_entry body
-    signature = log_entry_body["spec"]["signature"]["content"]
-    decoded_sig = base64.b64decode(signature)
-    certificate = log_entry_body["spec"]["signature"]["publicKey"]["content"]
-    decoded_cert = base64.b64decode(certificate)
+    # signature = log_entry_body["spec"]["signature"]["content"]
+    decoded_sig = base64.b64decode(
+        log_entry_body["spec"]["signature"]["content"]
+    )
+    # certificate = log_entry_body["spec"]["signature"]["publicKey"]["content"]
+    decoded_cert = base64.b64decode(
+        log_entry_body["spec"]["signature"]["publicKey"]["content"]
+    )
     # Extract public key from certificate
     public_key = extract_public_key(decoded_cert)
     # Verify artifact by signature and public key
     verify_artifact_signature(decoded_sig, public_key, artifact_filepath)
-    # verification_proof = get_verification_proof(log_entry[outer_key]['verification']['inclusionProof']['logIndex'])
+    # verification_proof = get_verification_proof(
+    #   log_entry[outer_key]['verification']['inclusionProof']['logIndex']
+    # )
     # print(json.dumps(verification_proof, indent=4))
     # Get index, tree_size, leaf_hash, hashes, root_hash from verification proof
     index = log_entry[outer_key]["verification"]["inclusionProof"]["logIndex"]
@@ -98,11 +107,11 @@ def inclusion(log_index, artifact_filepath, debug=False):
     hashes = log_entry[outer_key]["verification"]["inclusionProof"]["hashes"]
     root_hash = log_entry[outer_key]["verification"]["inclusionProof"]["rootHash"]
     # Verify inclusion
-    verify_inclusion(DefaultHasher, index, tree_size, leaf_hash, hashes, root_hash)
+    verify_inclusion(DefaultHasher, (index, tree_size, leaf_hash, hashes, root_hash))
     print("Offline root hash calculation for inclusion verified.")
 
 
-def get_latest_checkpoint(debug=False):
+def get_latest_checkpoint():
     """
     Returns the current root hash and size of the merkle tree used to store the log entries.
     """
@@ -116,7 +125,7 @@ def get_latest_checkpoint(debug=False):
         raise exception
 
 
-def consistency(prev_checkpoint, debug=False):
+def consistency(prev_checkpoint):
     """
     Verify that prev checkpoint is not empty.
 
@@ -130,8 +139,7 @@ def consistency(prev_checkpoint, debug=False):
     proof = get_proof(tree_size, ckpt["treeSize"])
     verify_consistency(
         DefaultHasher,
-        tree_size,
-        ckpt["treeSize"],
+        (tree_size, ckpt["treeSize"]),
         proof["hashes"],
         root_hash,
         ckpt["rootHash"],
@@ -140,11 +148,10 @@ def consistency(prev_checkpoint, debug=False):
 
 
 def main():
-    debug = False
+    """
+    Main function
+    """
     parser = argparse.ArgumentParser(description="Rekor Verifier")
-    parser.add_argument(
-        "-d", "--debug", help="Debug mode", required=False, action="store_true"
-    )  # Default false
     parser.add_argument(
         "-c",
         "--checkpoint",
@@ -184,16 +191,13 @@ def main():
         "--root-hash", help="Root hash for consistency proof", required=False
     )
     args = parser.parse_args()
-    if args.debug:
-        debug = True
-        print("enabled debug mode")
     if args.checkpoint:
         # get and print latest checkpoint from server
         # if debug is enabled, store it in a file checkpoint.json
-        checkpoint = get_latest_checkpoint(debug)
+        checkpoint = get_latest_checkpoint()
         print(json.dumps(checkpoint, indent=4))
     if args.inclusion:
-        inclusion(args.inclusion, args.artifact, debug)
+        inclusion(args.inclusion, args.artifact)
     if args.consistency:
         if not args.tree_id:
             print("please specify tree id for prev checkpoint")
@@ -210,7 +214,7 @@ def main():
         prev_checkpoint["treeSize"] = args.tree_size
         prev_checkpoint["rootHash"] = args.root_hash
 
-        consistency(prev_checkpoint, debug)
+        consistency(prev_checkpoint)
 
 
 if __name__ == "__main__":
