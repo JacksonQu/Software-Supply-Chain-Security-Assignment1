@@ -25,7 +25,7 @@ def get_log_entry(log_index):
     try:
         url = f"https://rekor.sigstore.dev/api/v1/log/entries?logIndex={log_index}"
         header = {"accept": "application/json"}
-        response = requests.get(url, headers=header)
+        response = requests.get(url, headers=header, timeout=3)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as exception:
@@ -47,7 +47,7 @@ def get_proof(size1: int, size2: int):
     try:
         url = f"https://rekor.sigstore.dev/api/v1/log/proof?firstSize={size1}&lastSize={size2}"
         header = {"accept": "application/json"}
-        response = requests.get(url, headers=header)
+        response = requests.get(url, headers=header, timeout=3)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as exception:
@@ -118,7 +118,7 @@ def get_latest_checkpoint():
     try:
         url = "https://rekor.sigstore.dev/api/v1/log?stable=true"
         header = {"accept": "application/json"}
-        response = requests.get(url, headers=header)
+        response = requests.get(url, headers=header, timeout=3)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as exception:
