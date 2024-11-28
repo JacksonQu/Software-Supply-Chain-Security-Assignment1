@@ -1,3 +1,6 @@
+"""
+Consistency test fail case2
+"""
 import subprocess
 
 def test_consistency():
@@ -11,7 +14,8 @@ def test_consistency():
          "--root-hash",
          "cadc0252423f2b41489c10c4b848b034bad90903be100a7c5877f4f98d6f5b6f"],
         capture_output=True,
-        text=True
+        text=True,
+        check=False,
     )
     assert result.returncode == 1, "The program should throw an error, but it doesn't."
 

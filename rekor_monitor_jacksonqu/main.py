@@ -74,7 +74,7 @@ def inclusion(log_index, artifact_filepath):
     """
     # Artifact filepath validation
     if not os.path.exists(artifact_filepath) or not os.path.isfile(artifact_filepath):
-        raise Exception("Artifact filepath invalid.")
+        raise FileNotFoundError("Artifact filepath invalid.")
     # Get log entry by log_index
     log_entry = get_log_entry(log_index)
     # print(json.dumps(log_entry, indent=4))

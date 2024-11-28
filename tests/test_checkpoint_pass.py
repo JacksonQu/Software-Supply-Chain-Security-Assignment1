@@ -1,7 +1,9 @@
+"""
+Checkpoint test pass case
+"""
 import json
-import os
-from jsonschema import validate
 import subprocess
+from jsonschema import validate
 
 # env = os.environ.copy()
 # env["PYTHONPATH"] = os.path.abspath("rekor_monitor_jacksonqu")
@@ -19,10 +21,14 @@ checkpoint_schema = {
 }
 
 def test_checkpoint():
+    """
+    Test whether the checkpoint function is normal
+    """
     result = subprocess.run(
         ["python", "rekor_monitor_jacksonqu/main.py", "-c"],
         capture_output=True,
-        text=True
+        text=True,
+        check=False,
     )
     assert result.returncode == 0, f"Test failed. Error message:\n{result.stderr}"
     output = result.stdout
